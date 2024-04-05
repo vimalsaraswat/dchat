@@ -15,13 +15,14 @@ interface Message {
 export default function Chat({
   chat,
   user,
+  chainId,
 }: {
   chat: {
     id: number;
     friend: string;
   };
-
   user: string;
+  chainId?: number;
 }) {
   const [message, setMessage] = useState<string>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -39,8 +40,8 @@ export default function Chat({
 
   async function refresh() {
     try {
-      if (chat.id !== undefined) {
-        const { results } = await db.prepare(`SELECT * FROM chat_31337_${chat.id};`).all();
+      if (chat.id !== undefined || chainId !== undefined) {
+        const { results } = await db.prepare(`SELECT * FROM chat_${chainId}_${chat.id};`).all();
         setMessages(results as unknown as Message[]);
         console.log(`Read data from table '${chat.id}':\n`, results);
       }
