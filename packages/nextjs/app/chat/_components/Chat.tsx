@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Database } from "@tableland/sdk";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
@@ -26,6 +26,12 @@ export default function Chat({
 }) {
   const [message, setMessage] = useState<string>();
   const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    refresh();
+    const intervalId = setInterval(refresh, 10000);
+    return () => clearInterval(intervalId);
+  });
 
   const { writeAsync, isLoading } = useScaffoldContractWrite({
     contractName: "Chat",
@@ -89,9 +95,6 @@ export default function Chat({
           ) : (
             <ArrowUpIcon className="h-4 w-4 cursor-pointer" aria-hidden="true" />
           )}
-        </button>
-        <button className="btn ml-2 btn-primary" type="button" onClick={refresh}>
-          Refresh
         </button>
       </form>
     </section>
