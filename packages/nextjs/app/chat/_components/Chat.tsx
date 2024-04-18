@@ -63,7 +63,7 @@ export default function Chat({
           >
             <div className="chat-bubble chat-bubble-secondary">{message.message}</div>
             <div className="chat-footer opacity-50 text-xs text-muted">
-              {new Date(Number(message.timestamp)).toLocaleString()}
+              {new Date(Number(message.timestamp) * 1000).toLocaleString()}
             </div>
           </div>
         ))}
