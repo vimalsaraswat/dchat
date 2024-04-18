@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Database } from "@tableland/sdk";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
-import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 interface Message {
   id: number;
@@ -33,14 +33,7 @@ export default function Chat({
     return () => clearInterval(intervalId);
   });
 
-  const { writeAsync, isLoading } = useScaffoldContractWrite({
-    contractName: "Chat",
-    functionName: "sendMessage",
-    args: [message, BigInt(chat.id)],
-    onBlockConfirmation: txnReceipt => {
-      console.log("📦 Transaction blockHash", txnReceipt.blockHash);
-    },
-  });
+  const { writeContractAsync, isMining } = useScaffoldWriteContract("Chat");
 
   const db = new Database();
 
@@ -75,9 +68,16 @@ export default function Chat({
         ))}
       </section>
       <form
-        action={() => {
-          writeAsync();
-          setMessage("");
+        action={async () => {
+          try {
+            await writeContractAsync({
+              functionName: "sendMessage",
+              args: [message, BigInt(chat.id)],
+            });
+            setMessage("");
+          } catch (e) {
+            console.error("Error sending message:", e);
+          }
         }}
         className="flex max-w-sm mx-auto rounded-full"
       >
@@ -89,8 +89,8 @@ export default function Chat({
           value={message}
           required
         />
-        <button type="submit" className="btn rounded-s btn-primary" disabled={isLoading || !user}>
-          {isLoading ? (
+        <button type="submit" className="btn rounded-s btn-primary" disabled={isMining || !user}>
+          {isMining ? (
             <span className="loading loading-spinner loading-sm"></span>
           ) : (
             <ArrowUpIcon className="h-4 w-4 cursor-pointer" aria-hidden="true" />
